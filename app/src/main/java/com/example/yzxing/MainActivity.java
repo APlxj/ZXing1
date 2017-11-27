@@ -3,17 +3,30 @@ package com.example.yzxing;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.qrcode.Constant;
 import com.example.qrcode.ScannerActivity;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.ChecksumException;
+import com.google.zxing.DecodeHintType;
+import com.google.zxing.FormatException;
+import com.google.zxing.NotFoundException;
+import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.qrcode.QRCodeReader;
+
+import java.util.Hashtable;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -64,6 +77,44 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, RESULT_REQUEST_CODE);
     }
 
+
+    /**
+     * 扫描二维码图片的方法
+     *
+     * @param path
+     * @return
+     */
+    public String scanningImage(String path) {
+        if (TextUtils.isEmpty(path)) {
+            return null;
+        }
+        //解码配置
+        Hashtable<DecodeHintType, String> hints = new Hashtable<>();
+        hints.put(DecodeHintType.CHARACTER_SET, "UTF8"); //设置二维码内容的编码
+        //加载图片
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true; // 先获取原大小
+        options.inJustDecodeBounds = false; // 获取新的大小
+        int sampleSize = (int) (options.outHeight / (float) 200);
+        if (sampleSize <= 0) sampleSize = 1;
+        options.inSampleSize = sampleSize;
+        Bitmap scanBitmap = BitmapFactory.decodeFile(path, options);
+        int width = scanBitmap.getWidth();
+        int height = scanBitmap.getHeight();
+        int[] lPixels = new int[width * height];
+        scanBitmap.getPixels(lPixels, 0, width, 0, 0, width, height);
+        RGBLuminanceSource source = new RGBLuminanceSource(width, height, lPixels);
+        //解码
+        BinaryBitmap bitmap1 = new BinaryBitmap(new HybridBinarizer(source));
+        QRCodeReader reader = new QRCodeReader();
+        try {
+            return reader.decode(bitmap1, hints).getText();
+        } catch (NotFoundException | ChecksumException | FormatException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[], @NonNull int[] grantResults) {
@@ -87,8 +138,8 @@ public class MainActivity extends AppCompatActivity {
                     if (data == null) return;
                     String type = data.getStringExtra(Constant.EXTRA_RESULT_CODE_TYPE);
                     String content = data.getStringExtra(Constant.EXTRA_RESULT_CONTENT);
-                    Toast.makeText(MainActivity.this,"codeType:" + type
-                            + "-----content:" + content,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "codeType:" + type
+                            + "-----content:" + content, Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
