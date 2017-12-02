@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.qrcode.Constant;
 import com.example.qrcode.ScannerActivity;
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
@@ -26,7 +27,10 @@ import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Set;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -35,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private final int RESULT_REQUEST_CODE = 1;
     private static final String TAG = "MainActivity";
 
-//    private HashMap<String, Set> mHashMap = new HashMap<>();
+    private HashMap<String, Set> mHashMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +48,10 @@ public class MainActivity extends AppCompatActivity {
         Button mScanner = (Button) findViewById(R.id.scanner);
         mScanner.setOnClickListener(mScannerListener);
 
-//        Set<BarcodeFormat> codeFormats = EnumSet.of(BarcodeFormat.QR_CODE
-//                , BarcodeFormat.CODE_128
-//                , BarcodeFormat.CODE_93 );
-//        mHashMap.put(ScannerActivity.BARCODE_FORMAT, codeFormats);
+        Set<BarcodeFormat> codeFormats = EnumSet.of(BarcodeFormat.QR_CODE
+                , BarcodeFormat.CODE_128
+                , BarcodeFormat.CODE_93 );
+        mHashMap.put(ScannerActivity.BARCODE_FORMAT, codeFormats);
     }
 
     private View.OnClickListener mScannerListener = new View.OnClickListener() {
@@ -61,6 +65,10 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    public void cretaZxing(View view) {
+        startActivity(new Intent(MainActivity.this, CretaActivity.class));
+    }
+
     private void goScanner() {
         Intent intent = new Intent(this, ScannerActivity.class);
         //这里可以用intent传递一些参数，比如扫码聚焦框尺寸大小，支持的扫码类型。
@@ -72,14 +80,14 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(Constant.EXTRA_SCANNER_FRAME_TOP_PADDING, 100);
         Bundle bundle = new Bundle();
         //设置支持的扫码类型
-//        bundle.putSerializable(Constant.EXTRA_SCAN_CODE_TYPE, mHashMap);
+        bundle.putSerializable(Constant.EXTRA_SCAN_CODE_TYPE, mHashMap);
         intent.putExtras(bundle);
         startActivityForResult(intent, RESULT_REQUEST_CODE);
     }
 
 
     /**
-     * 扫描二维码图片的方法
+     * 扫描图片二维码的方法
      *
      * @param path
      * @return
