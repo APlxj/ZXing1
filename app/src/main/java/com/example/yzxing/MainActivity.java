@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.qrcode.Constant;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_PERMISION_CODE_CAMARE = 0;
     private final int RESULT_REQUEST_CODE = 1;
     private static final String TAG = "MainActivity";
+    private TextView tv_content;
 
     private HashMap<String, Set> mHashMap = new HashMap<>();
 
@@ -47,10 +49,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Button mScanner = (Button) findViewById(R.id.scanner);
         mScanner.setOnClickListener(mScannerListener);
+        tv_content = (TextView) findViewById(R.id.tv_content);
 
         Set<BarcodeFormat> codeFormats = EnumSet.of(BarcodeFormat.QR_CODE
                 , BarcodeFormat.CODE_128
-                , BarcodeFormat.CODE_93 );
+                , BarcodeFormat.CODE_93);
         mHashMap.put(ScannerActivity.BARCODE_FORMAT, codeFormats);
     }
 
@@ -70,14 +73,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goScanner() {
+        int h = getResources().getDisplayMetrics().heightPixels;
+        int w = getResources().getDisplayMetrics().widthPixels;
         Intent intent = new Intent(this, ScannerActivity.class);
         //这里可以用intent传递一些参数，比如扫码聚焦框尺寸大小，支持的扫码类型。
         //设置扫码框的宽
-        intent.putExtra(Constant.EXTRA_SCANNER_FRAME_WIDTH, 400);
+        intent.putExtra(Constant.EXTRA_SCANNER_FRAME_WIDTH, w * 4 / 5);
         //设置扫码框的高
-        intent.putExtra(Constant.EXTRA_SCANNER_FRAME_HEIGHT, 400);
+        intent.putExtra(Constant.EXTRA_SCANNER_FRAME_HEIGHT, w * 4 / 5);
         //设置扫码框距顶部的位置
-        intent.putExtra(Constant.EXTRA_SCANNER_FRAME_TOP_PADDING, 100);
+        intent.putExtra(Constant.EXTRA_SCANNER_FRAME_TOP_PADDING, (h - w * 4 / 5) / 3);
         Bundle bundle = new Bundle();
         //设置支持的扫码类型
         bundle.putSerializable(Constant.EXTRA_SCAN_CODE_TYPE, mHashMap);
@@ -148,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
                     String content = data.getStringExtra(Constant.EXTRA_RESULT_CONTENT);
                     Toast.makeText(MainActivity.this, "codeType:" + type
                             + "-----content:" + content, Toast.LENGTH_SHORT).show();
+                    tv_content.setText(content);
                     break;
                 default:
                     break;
